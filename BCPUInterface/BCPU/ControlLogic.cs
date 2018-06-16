@@ -16,8 +16,7 @@ namespace BCPU
             control signals. Then use the dictionary to read the file, map the control signals, then return
             it in the following method
 
-            also, add in stuff for bitshifts: 1 bit for direction, 4 bits for amount, 1 bit for shift or not        -> 6 bits
-                multiplication / division: 1 for multiplication vs division, 1 for inputting numbers from a and b, 1 for get output from it, -> 3 bits
+            also, add in stuff multiplication / division: 1 for multiplication vs division, 1 for inputting numbers from a and b, 1 for get output from it, -> 3 bits
                 m/d will need a step counter/clock inhibit pin or something to prevent the computer from advancing during the multiplpication or division
         */
 
