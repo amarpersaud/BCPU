@@ -25,6 +25,9 @@ namespace BCPU
         /// </summary>
         public Register BRegister;
 
+        public Register OutputRegister;
+        public Counter OutputMode;
+
         /// <summary>
         /// Program counter.
         /// </summary>
@@ -191,6 +194,10 @@ namespace BCPU
 
             UInt32 ControlLogicOutput = ControlLogic.GetControlSignals(StepCounter.Get(), InstructionRegister.Get());
 
+            //Set the alu mode bits to the appropriate control signals
+            ALU.SetMode(ControlLogicOutput);
+
+
             /*
                 Falling edge clock stuff.
              */
@@ -203,15 +210,18 @@ namespace BCPU
             //Set bus to whatever wants to write to the bus
             SetBusToOutput(BusOutputEncoderOut);
 
-            //Read from the bus into whatever register.
-                //Todo: implement
+            //Read from the bus into whatever register(s) the control logic selects
+            GetInputFromBus(ControlLogicOutput);
 
 
 
         }
 
         
-
+        /// <summary>
+        /// Set the bus to whichever counter/register/memory is selected by the control logic
+        /// </summary>
+        /// <param name="EncoderOutput">Output of the 4:10 / 4:16 encoder for the bus output bits</param>
         public void SetBusToOutput(UInt32 EncoderOutput) {
             switch (EncoderOutput)
             {
@@ -243,9 +253,53 @@ namespace BCPU
                     Bus = 0;
                     break;
             }
-
-
         }
+
+        /// <summary>
+        /// Check each bit for the appropriate input from bus flag, then set the appropriate register
+        /// to the value on the bus
+        /// </summary>
+        /// <param name="ControlSignals">Control signals from the control logic</param>
+        public void GetInputFromBus(UInt32 ControlSignals)
+        {
+            if (ControlSignals.HasFlag(ControlLogic.AI))
+            {
+                ARegister.Set(Bus);
+            }
+            if (ControlSignals.HasFlag(ControlLogic.BI))
+            {
+                BRegister.Set(Bus);
+            }
+            if (ControlSignals.HasFlag(ControlLogic.CI))
+            {
+                ProgramCounter.Set(Bus);
+            }
+            if (ControlSignals.HasFlag(ControlLogic.MI))
+            {
+                ROMAddressRegister.Set(Bus);
+            }
+            if (ControlSignals.HasFlag(ControlLogic.II))
+            {
+                InstructionRegister.Set(Bus);
+            }
+            if (ControlSignals.HasFlag(ControlLogic.RAI))
+            {
+                RAM[RAMAddressRegister.Get()] = Bus;
+            }
+            if (ControlSignals.HasFlag(ControlLogic.RARI))
+            {
+                RAMAddressRegister.Set(Bus);
+            }
+            if (ControlSignals.HasFlag(ControlLogic.OI))
+            {
+                OutputRegister.Set(Bus);
+            }
+            if (ControlSignals.HasFlag(ControlLogic.AI))
+            {
+                ARegister.Set(Bus);
+            }
+        }
+
 
     }
 }
